@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace需要对应dao接口的完全限定名 （包名+类名）-->
+<mapper namespace="com.aaa.dao.UserDao">
+    <!--2级缓存
+<cache eviction="FIFO" flushInterval="60000" size="512" readOnly="true"/>
+-->
+    <select id="listAll" resultType="User">
+    select u.id,u.userCode,u.userName,u.userPassword,u.birthday,u.phone,u.address,u.userRole from smbms_user u
+    </select>
+    <select id="findByName" resultType="User" parameterType="User">
+        select u.id,u.userCode,u.userName,u.userPassword,u.birthday,u.phone,u.address,u.userRole from smbms_user u
+
+        <where>
+            <if test="userName!=null">
+               and  u.userName like concat('%',#{userName},'%')
+            </if>
+            <if test="userRole!=null">
+                and u.userRole=#{userRole}
+            </if>
+        </where>
+
+
+    </select>
+
+    <select id="findByNameTwo" resultType="User" parameterType="User">
+        select u.id,u.userCode,u.userName,u.userPassword,u.birthday,u.phone,u.address,u.userRole from smbms_user u
+            <trim prefixOverrides="and|or" prefix="where">
+                <if test="userName!=null">
+                    and  u.userName like concat('%',#{userName},'%')
+                </if>
+                <if test="userRole!=null">
+                    and u.userRole=#{userRole}
+                </if>
+            </trim>
+    </select>
+    <!--resultMap 和type一样的，
+    id：唯一名字
+    type：返回结果集类型
+    autoMapping:自动映射，前提数据库字段实体类相同
+    使用目的：在数据库字段名和实体类字段不相同时候进行手动匹配映射-->
+    <resultMap id="userMap" type="User" autoMapping="true">
+        <!--id:主键关系
+        column：对应数据库字段 不区分大小写
+        property：对应实体类对象，区分大小写-->
+        <id column="id" property="id"></id>
+        <result property="userCode" column="userCode"></result>
+        <result property="userName" column="userName"></result>
+        <result property="userPassword" column="userPassword"></result>
+        <result property="birthday" column="birthday"></result>
+        <result property="phone" column="phone"></result>
+        <result property="address" column="address"></result>
+        <result property="roleName" column="roleName"></result>
+    </resultMap>
+    <update id="update" parameterType="User">
+        update smbms_user set userName=#{userName},userPassword=#{userPassword},address=#{address} where id=#{id}
+    </update>
+    <update id="updateTwo" parameterType="User">
+        update smbms_user
+            <set>
+                <if test="userName!=null">userName=#{userName},</if>
+                <if test="userPassword!=null">userPassword=#{userPassword},</if>
+                <if test="address!=null">address=#{address},</if>
+            </set>
+       where id=#{id}
+    </update>
+    <update id="updateThree" parameterType="User">
+        update smbms_user
+            <trim suffixOverrides="," suffix=" where id=#{id}" prefix="set" prefixOverrides="">
+                <if test="userName!=null">userName=#{userName},</if>
+                <if test="userPassword!=null">userPassword=#{userPassword},</if>
+                <if test="address!=null">address=#{address},</if>
+            </trim>
+    </update>
+    <select id="findByUserRole" resultType="User" >
+    select u.id,u.userCode,u.userName,u.userPassword,u.birthday,u.phone,u.address,u.userRole from smbms_user u
+     where userRole in
+    <foreach collection="array" close=")" separator="," open="(" item="arr" >
+        #{arr}
+    </foreach>
+    </select>
+    <select id="findByUserId" resultType="User" >
+        select u.id,u.userCode,u.userName,u.userPassword,u.birthday,u.phone,u.address,u.userRole from smbms_user u
+        where id in
+        <foreach collection="list" close=")" separator="," open="(" item="arr" >
+            #{arr}
+        </foreach>
+    </select>
+    <select id="findByUserIdTwo" resultType="User" >
+        select u.id,u.userCode,u.userName,u.userPassword,u.birthday,u.phone,u.address,u.userRole from smbms_user u
+        where id in
+        <foreach collection="ids" close=")" separator="," open="(" item="arr" >
+            #{arr}
+        </foreach>
+    </select>
+
+
+    <select id="findByNameRoleAdd" resultType="User" parameterType="User" >
+        select u.id,u.userCode,u.userName,u.userPassword,u.birthday,u.phone,u.address,u.userRole from smbms_user u
+       where 1=1
+            <choose>
+                <when test="userName!=null and userRole!=null and address!=null">
+                    and  userName like concat('%',#{userName},'%') and userRole =#{userRole}
+                    and address =#{address}
+                </when>
+                <when test="userName!=null and userRole!=null">
+                    and userName like concat('%',#{userName},'%') and userRole =#{userRole}
+                </when>
+                <when test="userName!=null">
+                    and userName like concat('%',#{userName},'%')
+                </when>
+                <otherwise>
+                    order by id desc0
+                </otherwise>
+            </choose>
+
+    </select>
+    <select id="page" resultType="User">
+        select u.id,u.userCode,u.userName,u.userPassword,u.birthday,u.phone,u.address,u.userRole from smbms_user u
+        limit #{pageNo},#{pageSize}
+    </select>
+</mapper>

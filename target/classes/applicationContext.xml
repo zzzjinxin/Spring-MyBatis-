@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+        <!--扫描包-->
+        <context:component-scan base-package="com.aaa"></context:component-scan>
+        <context:property-placeholder location="classpath:db.properties"></context:property-placeholder>
+        <!--配置连接池-->
+        <bean class="org.apache.commons.dbcp.BasicDataSource" id="dataSource">
+                <property name="driverClassName" value="${driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${uname}"/>
+                <property name="password" value="${password}"/>
+                <!--连接初始化数量-->
+                <property name="initialSize" value="2"/>
+                <property name="maxWait" value="5000"/>
+                <property name="maxActive" value="5"></property>
+                <property name="maxIdle" value="2"></property>
+                <property name="minIdle" value="2"></property>
+        </bean>
+        <bean class="com.alibaba.druid.pool.DruidDataSource" id="source">
+                <property name="driverClassName" value="${driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${uname}"/>
+                <property name="password" value="${password}"/>
+                <!--连接初始化数量-->
+                <property name="initialSize" value="2"/>
+                <property name="maxWait" value="5000"/>
+                <property name="maxActive" value="5"></property>
+                <property name="maxIdle" value="2"></property>
+                <property name="minIdle" value="2"></property>
+        </bean>
+        <!--配置sqlsessionFactroyBean-->
+        <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sessionFactory">
+                <!--获取连接池对象-->
+                <property name="dataSource" ref="source"/>
+                <!--如果有mybatis配置文件则加载-->
+                <property name="configLocation" value="classpath:mybatis-cfg.xml"/>
+                <!--读取mapper文件-->
+                <property name="mapperLocations" value="classpath:com/aaa/dao/*.xml"/>
+        </bean>
+
+        <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" id="scannerConfigurer">
+                <property name="basePackage" value="com.aaa.dao"/>
+        </bean>
+        <bean class="com.aaa.service.impl.UserServiceImpl" id="service">
+
+        </bean>
+</beans>
